@@ -1,0 +1,47 @@
+Start
+  │
+  ▼
+[Initialize Shared Task Queue]
+  │
+  ├──────────────┬──────────────┐
+  ▼              ▼              ▼
+[Start Producer] [Start Producer] ... (Multiple Producers)
+  │              │
+  ▼              ▼
+[Generate Task]  [Generate Task]
+  │              │
+  ▼              ▼
+[Add Task to Queue (PriorityBlockingQueue)]  ←─────────────┐
+  │                                                        ▲
+  ▼                                                        │
+ ──────────────────────────────────────────────────────────┘
+          (Shared Blocking Queue)
+  │
+  ▼
+ ┌────────────────────────────────────────────┐
+ │             Consumer Threads               │
+ │                                            │
+ │   ┌────────────┐      ┌────────────┐       │
+ │   ▼            ▼      ▼            ▼       │
+ │ [Take Task from Queue] [Take Task from Queue] (Blocking)
+ │   │            │      │            │       │
+ │   ▼            ▼      ▼            ▼       │
+ │ [Mark Task as PROCESSING]                  │
+ │   │            │      │            │       │
+ │   ▼            ▼      ▼            ▼       │
+ │ [Process Task] [Process Task]   ...        │
+ │   │            │      │            │       │
+ │   ▼            ▼      ▼            ▼       │
+ │ [Mark Task as COMPLETED]                   │
+ │                                            │
+ │ (If POISON task, break loop and exit)      │
+ └────────────────────────────────────────────┘
+  │
+  ▼
+[Export Results to JSON (JsonExporter)]
+  │
+  ▼
+[Stop Monitor + Shutdown Thread Pools]
+  │
+  ▼
+End
