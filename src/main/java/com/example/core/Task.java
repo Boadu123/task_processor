@@ -1,4 +1,4 @@
-package com.example.models;
+package com.example.core;
 
 import java.time.Instant;
 import java.util.UUID;
@@ -23,6 +23,10 @@ public class Task implements Comparable<Task> {
     public int getPriority() { return priority; }
     public Instant getCreatedTimestamp() { return createdTimestamp; }
     public String getPayload() { return payload; }
+
+    public boolean isPoisonPill() {
+        return this.name != null && this.name.equals("POISON");
+    }
 
     @Override
     public int compareTo(Task other) {
