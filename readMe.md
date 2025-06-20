@@ -34,8 +34,7 @@ A multithreaded Java application demonstrating core concurrency concepts includi
 
 🔒 Deadlock Simulation & Resolution — Demonstrates how deadlocks occur and how to fix them
 
-flowchart TD
-```
+```mermaid
 graph TD
 
 %% Initialization
