@@ -19,7 +19,7 @@ public class Producer implements Runnable {
     private String producerName;
     private int numberOfTasks;
     private boolean highPriority;
-    private static final AtomicInteger submittedCount = new AtomicInteger(0);
+    public static final AtomicInteger submittedCount = new AtomicInteger(0);
 
     public static int getSubmittedCount() {
         return submittedCount.get();
