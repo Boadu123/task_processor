@@ -46,9 +46,9 @@ public class Producer implements Runnable {
                         .createdTimestamp(Instant.now())
                         .build();
                 Thread.sleep(1000);
+                taskStatusMap.put(task.getId(), TaskStatus.SUBMITTED);
                 queue.put(task);
                 submittedCount.incrementAndGet();
-                taskStatusMap.put(task.getId(), TaskStatus.SUBMITTED);
 
                 logger.info("{} {} submitted task: {} {}", Thread.currentThread().getName(), producerName, i, task);
                 logger.info("Current taskStatusMap after submission: {}", taskStatusMap);
