@@ -35,68 +35,80 @@ A multithreaded Java application demonstrating core concurrency concepts includi
 🔒 Deadlock Simulation & Resolution — Demonstrates how deadlocks occur and how to fix them
 
 flowchart TD
-Start([Start])
-Init[Initialize Shared Task Queue]
+```
+graph TD
 
-    subgraph Producers
-        P1[Start Producer 1]
-        P2[Start Producer 2]
-        Pn[...] 
-        Gen1[Generate Task 1]
-        Gen2[Generate Task 2]
-        GenN[...]
+%% Initialization
+Start(["Start"])
+Init["Initialize Shared Task Queue"]
+Start --> Init
 
-        P1 --> Gen1 --> Add1[Add Task to Queue (BlockingQueue)]
-        P2 --> Gen2 --> Add2[Add Task to Queue (BlockingQueue)]
-        Pn --> GenN --> AddN[Add Task to Queue (BlockingQueue)]
-    end
+%% Producers
+P1["Start Producer 1"]
+P2["Start Producer 2"]
+Pn["..."]
 
-    Queue[(Shared Blocking Queue)]
+Gen1["Generate Task 1"]
+Gen2["Generate Task 2"]
+GenN["..."]
 
-    subgraph Consumers
-        CT1[Take Task from Queue]
-        Mark1[Mark Task as PROCESSING]
-        Proc1[Process Task]
-        Done1[Mark Task as COMPLETED]
+Add1["Add Task to Queue (BlockingQueue)"]
+Add2["Add Task to Queue (BlockingQueue)"]
+AddN["Add Task to Queue (BlockingQueue)"]
 
-        CT2[Take Task from Queue]
-        Mark2[Mark Task as PROCESSING]
-        Proc2[Process Task]
-        Done2[Mark Task as COMPLETED]
+Init --> P1 --> Gen1 --> Add1
+Init --> P2 --> Gen2 --> Add2
+Init --> Pn --> GenN --> AddN
 
-        CTN[...] 
+%% Shared Queue
+Queue["Shared Blocking Queue"]
+Add1 --> Queue
+Add2 --> Queue
+AddN --> Queue
 
-        CT1 --> Mark1 --> Proc1 --> Done1
-        CT2 --> Mark2 --> Proc2 --> Done2
-        CTN --> [...]
+%% Consumers
+CT1["Take Task from Queue"]
+CT2["Take Task from Queue"]
+CTN["..."]
 
-        Done1 --> PoisonCheck1{{POISON Task?}}
-        PoisonCheck1 -->|Yes| Exit1([Break loop & Exit])
-        PoisonCheck1 -->|No| CT1
+Mark1["Mark Task as PROCESSING"]
+Proc1["Process Task"]
+Done1["Mark Task as COMPLETED"]
 
-        Done2 --> PoisonCheck2{{POISON Task?}}
-        PoisonCheck2 -->|Yes| Exit2([Break loop & Exit])
-        PoisonCheck2 -->|No| CT2
-    end
+Mark2["Mark Task as PROCESSING"]
+Proc2["Process Task"]
+Done2["Mark Task as COMPLETED"]
 
-    Export[Export Results to JSON (JsonExporter)]
-    Shutdown[Stop Monitor + Shutdown Thread Pools]
-    End([End])
+Queue --> CT1 --> Mark1 --> Proc1 --> Done1
+Queue --> CT2 --> Mark2 --> Proc2 --> Done2
+Queue --> CTN
 
-    Start --> Init --> P1
-    Init --> P2
-    Init --> Pn
-    Add1 --> Queue
-    Add2 --> Queue
-    AddN --> Queue
+%% Poison Pill Handling
+PoisonCheck1{{POISON Task?}}
+PoisonCheck2{{POISON Task?}}
 
-    Queue --> CT1
-    Queue --> CT2
-    Queue --> CTN
+Done1 --> PoisonCheck1
+Done2 --> PoisonCheck2
 
-    Exit1 --> Export
-    Exit2 --> Export
-    Export --> Shutdown --> End
+Exit1["Break loop & Exit"]
+Exit2["Break loop & Exit"]
+
+PoisonCheck1 -- Yes --> Exit1
+PoisonCheck1 -- No --> CT1
+
+PoisonCheck2 -- Yes --> Exit2
+PoisonCheck2 -- No --> CT2
+
+%% Output
+Export["Export Results to JSON (JsonExporter)"]
+Shutdown["Stop Monitor + Shutdown Thread Pools"]
+End(["End"])
+
+Exit1 --> Export
+Exit2 --> Export
+Export --> Shutdown --> End
+
+```
 
 
 ## 🛠️ Prerequisites
