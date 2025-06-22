@@ -44,7 +44,21 @@ public class Consumer implements Runnable{
 
             } catch (InterruptedException e) {
                 Thread.currentThread().interrupt();
-                taskStatusMap.put(task.getId(), TaskStatus.FAILED);
+
+                if (task.getRetryCount() < 3) {
+                    task.incrementRetryCount();
+                    logger.warn("Retrying task {} (Attempt {})", task.getId(), task.getRetryCount());
+                    try {
+                        queue.put(task); // might throw InterruptedException
+                    } catch (InterruptedException ex) {
+                        Thread.currentThread().interrupt();
+                        logger.error("Retry failed for task {} due to interruption", task.getId(), ex);
+                    }                } else {
+                    taskStatusMap.put(task.getId(), TaskStatus.FAILED);
+                    logger.error("Task {} failed after 3 retries", task.getId());
+                }
+
+
                 logger.warn("{} was interrupted", Thread.currentThread().getName(), e);
                 logger.info("Current taskStatusMap after failure: {}", taskStatusMap);
                 break;

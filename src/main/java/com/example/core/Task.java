@@ -9,6 +9,7 @@ public class Task implements Comparable<Task> {
     private final int priority;
     private final Instant createdTimestamp;
     private final String payload;
+    private int retryCount = 0;
 
     private Task(Builder builder) {
         this.id = builder.id != null ? builder.id : UUID.randomUUID();
@@ -23,6 +24,7 @@ public class Task implements Comparable<Task> {
     public int getPriority() { return priority; }
     public Instant getCreatedTimestamp() { return createdTimestamp; }
     public String getPayload() { return payload; }
+    public int getRetryCount() { return retryCount; }
 
     public boolean isPoisonPill() {
         return this.name != null && this.name.equals("POISON");
@@ -37,6 +39,10 @@ public class Task implements Comparable<Task> {
     public String toString() {
         return String.format("Task{id=%s, name=%s, priority=%d, time=%s}",
                 id, name, priority, createdTimestamp);
+    }
+
+    public void incrementRetryCount() {
+        this.retryCount++;
     }
 
     public static class Builder {
