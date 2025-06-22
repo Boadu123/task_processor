@@ -6,13 +6,13 @@ import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
 
 import com.example.consumer.Consumer;
+import com.example.enums.TaskStatus;
 import com.example.utils.JsonExporter;
 import com.example.producer.Producer;
 import com.example.core.Task;
 import com.example.monitor.Monitor;
 
-import static com.example.producer.Producer.logger;
-import static com.example.producer.Producer.queue;
+import static com.example.producer.Producer.*;
 
 public class Main {
     public static void main(String[] args) throws InterruptedException {
@@ -40,6 +40,22 @@ public class Main {
 
         queue.put(new Task.Builder().name("POISON").priority(Integer.MAX_VALUE).build());
         queue.put(new Task.Builder().name("POISON").priority(Integer.MAX_VALUE).build());
+
+        Runtime.getRuntime().addShutdownHook(new Thread(() -> {
+            System.out.println("Shutdown initiated. Draining queue and shutting down...");
+
+            // Draining remaining tasks
+            queue.forEach(task -> {
+                if (!task.isPoisonPill()) {
+                    taskStatusMap.put(task.getId(), TaskStatus.FAILED);
+                    logger.warn("Task {} marked as FAILED during shutdown", task.getId());
+                }
+            });
+
+            System.out.println("Shutdown complete.");
+        }));
+
+
         consumerPool.shutdown();
         if (!consumerPool.awaitTermination(30, TimeUnit.SECONDS)) {
             logger.warn("Consumers didn't shut down in time.");
@@ -51,6 +67,8 @@ public class Main {
             logger.warn("Monitor didn't shut down in time.");
             monitorService.shutdownNow();
         }
+
+
 
         JsonExporter.shutdown();
 
